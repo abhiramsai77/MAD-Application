@@ -1,0 +1,45 @@
+package com.example.taskmanagerapp;
+
+import android.app.Dialog;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+
+public class AddTaskDialog extends DialogFragment {
+
+    public interface OnTaskAdded {
+        void onTaskAdded(String task);
+    }
+
+    private OnTaskAdded listener;
+
+    public AddTaskDialog(OnTaskAdded listener) {
+        this.listener = listener;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_task, null);
+
+        EditText taskInput = view.findViewById(R.id.taskInput);
+        Button addBtn = view.findViewById(R.id.addTaskBtn);
+
+        Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(view);
+
+        addBtn.setOnClickListener(v -> {
+            String task = taskInput.getText().toString();
+            listener.onTaskAdded(task);
+            dialog.dismiss();
+        });
+
+        return dialog;
+    }
+}

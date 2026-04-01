@@ -1,0 +1,44 @@
+package com.example.taskmanagerapp;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
+import java.util.concurrent.TimeUnit;
+import androidx.appcompat.widget.Toolbar;
+
+public class DashboardActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_dashboard);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Load Fragment
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, new TaskFragment())
+                .commit();
+
+        // Show username
+        SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        String user = prefs.getString("username", "User");
+
+        Toast.makeText(this, "Welcome " + user, Toast.LENGTH_SHORT).show();
+
+        // WorkManager Reminder
+        OneTimeWorkRequest work =
+                new OneTimeWorkRequest.Builder(ReminderWorker.class)
+                        .setInitialDelay(10, TimeUnit.SECONDS)
+                        .build();
+
+        WorkManager.getInstance(this).enqueue(work);
+    }
+}

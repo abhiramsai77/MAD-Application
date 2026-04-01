@@ -1,0 +1,93 @@
+package com.example.taskmanagerapp;
+
+import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.content.SharedPreferences;
+
+import java.util.ArrayList;
+import java.util.List;
+import android.content.Intent;
+
+public class TaskFragment extends Fragment {
+
+    RecyclerView recyclerView;
+    List<String> taskList;
+    TaskAdapter adapter;
+
+    public TaskFragment() {
+        // Required empty constructor
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.fragment_task, container, false);
+
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // 🔥 LOAD SAVED TASKS
+        SharedPreferences prefs = getActivity().getSharedPreferences("Tasks", getContext().MODE_PRIVATE);
+
+        taskList = new ArrayList<>();
+
+        String savedTasks = prefs.getString("task_list", "");
+
+        if (!savedTasks.isEmpty()) {
+            String[] tasks = savedTasks.split(",");
+            for (String t : tasks) {
+                if (!t.isEmpty()) {
+                    taskList.add(t);
+                }
+            }
+        } else {
+            // First time default tasks
+            taskList.add("Study Android");
+            taskList.add("Complete Assignment");
+            taskList.add("Build App");
+        }
+
+        adapter = new TaskAdapter(taskList);
+        recyclerView.setAdapter(adapter);
+
+        Button addBtn = view.findViewById(R.id.addBtn);
+
+        addBtn.setOnClickListener(v -> {
+
+            AddTaskDialog dialog = new AddTaskDialog(task -> {
+                taskList.add(task);
+                adapter.notifyDataSetChanged();
+
+                // 🔥 SAVE TASKS
+                SharedPreferences prefs1 = getActivity().getSharedPreferences("Tasks", getContext().MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs1.edit();
+
+                StringBuilder sb = new StringBuilder();
+                for (String t : taskList) {
+                    sb.append(t).append(",");
+                }
+
+                editor.putString("task_list", sb.toString());
+                editor.apply();
+            });
+
+            dialog.show(getParentFragmentManager(), "AddTask");
+        });
+        Button webBtn = view.findViewById(R.id.webBtn);
+
+        webBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), WebViewActivity.class);
+            startActivity(intent);
+        });
+        return view;
+    }
+}

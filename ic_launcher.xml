@@ -1,0 +1,27 @@
+package com.example.taskmanagerapp;
+
+import android.content.Context;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
+public class ReminderWorker extends Worker {
+
+    public ReminderWorker(@NonNull Context context, @NonNull WorkerParameters params) {
+        super(context, params);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+
+        android.os.Handler handler = new android.os.Handler(getApplicationContext().getMainLooper());
+        handler.post(() ->
+                Toast.makeText(getApplicationContext(), "Reminder: Check your tasks!", Toast.LENGTH_LONG).show()
+        );
+
+        return Result.success();
+    }
+}
